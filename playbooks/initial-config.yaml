@@ -7,12 +7,14 @@
       ansible.builtin.dnf:
         name: epel-release
         state: latest
+    - debug: var=result.stdout_lines
 
     - name: Upgrade packages & repositories
       register: result
       ansible.builtin.dnf:
         name: "*"
         state: latest
+    - debug: var=result.stdout_lines
 
     - name: Install basic packages
       register: result
@@ -32,6 +34,7 @@
           - nfs-utils
           - wget
         state: latest
+    - debug: var=result.stdout_lines
 
     - name: Start service sshd
       register: result
@@ -39,6 +42,4 @@
         name: sshd
         enabled: true
         state: started
-
-    - debug:
-        var: result.stdout_lines
+    - debug: var=result.stdout_lines
