@@ -51,6 +51,12 @@
           chsh -s /usr/bin/zsh
           wget -nv -O - https://raw.githubusercontent.com/zimfw/install/master/install.zsh | zsh
           echo "zmodule romkatv/powerlevel10k --use degit" >> ~/.zimrc
+          echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> ~/.zimrc
           zsh -s "zimfw install"
-          cp /etc/ansible/files/p10k.zsh ~/.p10k.zsh
+    - debug: var=result
+    - name: Copy p10k config file to home
+      register: result
+      copy:
+        src: "../files/p10k.zsh"
+        dest: "~/.p10k.zsh"
     - debug: var=result
