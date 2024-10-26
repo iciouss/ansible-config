@@ -52,4 +52,5 @@
           wget -nv -O - https://raw.githubusercontent.com/zimfw/install/master/install.zsh | zsh
           echo "zmodule romkatv/powerlevel10k --use degit" >> ~/.zimrc
           zsh -s "zimfw install"
+          cp /etc/ansible/files/p10k.zsh ~/.p10k.zsh
     - debug: var=result
