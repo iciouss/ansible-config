@@ -3,16 +3,19 @@
   hosts: localhost
   tasks:
     - name: Install epel-release
+      register: result
       ansible.builtin.dnf:
         name: epel-release
         state: latest
-        register: result
+
     - name: Upgrade packages & repositories
+      register: result
       ansible.builtin.dnf:
         name: "*"
         state: latest
-        register: result
+
     - name: Install basic packages
+      register: result
       ansible.builtin.dnf:
         name:
           - git
@@ -29,12 +32,13 @@
           - nfs-utils
           - wget
         state: latest
-        register: result
+
     - name: Start service sshd
+      register: result
       ansible.builtin.service:
         name: sshd
         enabled: true
         state: started
-        register: result
+
     - debug:
         var: result.stdout_lines
