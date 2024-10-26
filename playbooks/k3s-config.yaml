@@ -1,0 +1,11 @@
+---
+- name: Configure node for K3S
+  hosts: localhost
+  tasks:
+    - name: Create file k3s-resolv.conf
+      register: result
+      copy:
+        dest: "k3s-resolv.conf"
+        content: |
+          nameserver 1.1.1.1
+    - debug: var=result

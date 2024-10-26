@@ -43,3 +43,13 @@
         enabled: true
         state: started
     - debug: var=result
+
+    - name: Configure zsh, zimfw and p10k
+      register: result
+      ansible.builtin.shell:
+        cmd: |
+          chsh -s /usr/bin/zsh
+          wget -nv -O - https://raw.githubusercontent.com/zimfw/install/master/install.zsh | zsh
+          echo "zmodule romkatv/powerlevel10k --use degit" >> ~/.zimrc
+          zsh -s "zimfw install"
+    - debug: var=result
