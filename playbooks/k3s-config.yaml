@@ -9,3 +9,72 @@
         content: |
           nameserver 1.1.1.1
     - debug: var=result
+    - name: Configure shell
+      register: result
+      ansible.builtin.shell:
+        cmd: |
+          echo 'export KUBECONFIG=/etc/rancher/k3s/k3s.yaml' >> ~/.zshrc
+    - debug: var=result
+    - name: Install K3S
+      register: result
+      ansible.builtin.shell:
+        cmd: |
+          MASTER_NODE_IP=192.168.0.70
+          curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--node-external-ip=$MASTER_NODE_IP --node-ip=$MASTER_NODE_IP --disable=traefik --disable=servicelb --flannel-backend=none --disable-network-policy --node-label role=master --resolv-conf=/etc/k3s-resolv.conf --kubelet-arg=allowed-unsafe-sysctls=net.ipv4.conf.all.*" sh -
+    - debug: var=result
+    - name: Download Cilium and install CLI
+      register: result
+      ansible.builtin.shell:
+        cmd: |
+          CILIUM_CLI_VERSION=$(curl -s https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt)
+          CLI_ARCH=amd64
+          if [ "$(uname -m)" = "aarch64" ]; then CLI_ARCH=arm64; fi
+          curl -L --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/${CILIUM_CLI_VERSION}/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
+          sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum
+          sudo tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin
+          rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
+    - debug: var=result
+    - name: Generate cilium-values.yaml and install Cilium via HELM
+      register: result
+      ansible.builtin.shell:
+        cmd: |
+          echo \
+          "kubeProxyReplacement: true
+          envoy:
+            enabled: false
+          hubble:
+            relay:
+              enabled: false
+            ui:
+              enabled: false
+              service:
+                type: NodePort
+                nodePort: 30080
+          ipam:
+            operator:
+              clusterPoolIPv4PodCIDRList: 
+                - 10.42.0.0/16
+          operator:
+            replicas: 1
+            nodeSelector:
+              role: master
+          k8sClientRateLimit:
+            qps: 40
+            burst: 80
+          l2announcements:
+            enabled: true
+            leaseDuration: 3s
+            leaseRenewDeadline: 1s
+            leaseRetryPeriod: 200ms
+          bpf:
+            masquerade: true
+          ipMasqAgent:
+            enabled: true
+            config:
+              nonMasqueradeCIDRs: []
+          nodePort:
+            enabled: true" > cilium-values.yaml
+
+          CILIUM_VERSION=1.16.2
+          cilium install --version $CILIUM_VERSION --values cilium-values.yaml --wait
+    - debug: var=result
