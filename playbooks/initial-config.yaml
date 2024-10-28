@@ -51,8 +51,10 @@
           chsh -s /usr/bin/zsh
           wget -nv -O - https://raw.githubusercontent.com/zimfw/install/master/install.zsh | zsh
           echo "zmodule romkatv/powerlevel10k --use degit" >> ~/.zimrc
-          echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> ~/.zimrc
+          echo "[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh" >> ~/.zshrc
+          echo "export PATH=$PATH:/usr/local/bin" >> ~/.zshrc
           zsh -s "zimfw install"
+
     - debug: var=result
     - name: Copy p10k config file to home
       register: result
