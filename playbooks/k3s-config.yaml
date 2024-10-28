@@ -6,9 +6,9 @@
     - name: Create file k3s-resolv.conf
       register: result
       copy:
-        dest: "k3s-resolv.conf"
+        dest: "/etc/k3s-resolv.conf"
         content: |
-          nameserver 1.1.1.1
+          nameserver {{ ansible_facts.dns.nameservers[0] }}
     - debug: var=result
     - name: Configure shell
       register: result
@@ -39,6 +39,7 @@
       register: result
       ansible.builtin.shell:
         cmd: |
+          sleep 5
           echo \
           "kubeProxyReplacement: true
           envoy:
@@ -74,8 +75,8 @@
             config:
               nonMasqueradeCIDRs: []
           nodePort:
-            enabled: true" > cilium-values.yaml
+            enabled: true" > /root/cilium-values.yaml
 
           CILIUM_VERSION=1.16.2
-          cilium install --version $CILIUM_VERSION --values cilium-values.yaml --wait
+          cilium install --version $CILIUM_VERSION --values /root/cilium-values.yaml --wait
     - debug: var=result
