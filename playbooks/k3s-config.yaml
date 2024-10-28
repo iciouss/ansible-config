@@ -1,6 +1,7 @@
 ---
 - name: Configure node for K3S
   hosts: localhost
+  gather_facts: true
   tasks:
     - name: Create file k3s-resolv.conf
       register: result
@@ -19,7 +20,7 @@
       register: result
       ansible.builtin.shell:
         cmd: |
-          MASTER_NODE_IP=192.168.0.70
+          MASTER_NODE_IP={{ ansible_facts.default_ipv4.address }}
           curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--node-external-ip=$MASTER_NODE_IP --node-ip=$MASTER_NODE_IP --disable=traefik --disable=servicelb --flannel-backend=none --disable-network-policy --node-label role=master --resolv-conf=/etc/k3s-resolv.conf --kubelet-arg=allowed-unsafe-sysctls=net.ipv4.conf.all.*" sh -
     - debug: var=result
     - name: Download Cilium and install CLI
